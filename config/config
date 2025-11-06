@@ -1,0 +1,2 @@
+STORE_DIR="$HOME/redot/store"
+DATABASE_FILE="$HOME/redot/.dotfiles_db"
