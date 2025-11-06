@@ -145,8 +145,6 @@ case "$1" in
     restore) restore_files ;;
     list) list_files ;;
 	sync) git_sync ;;
-    *) echo "Invalid command" ;;
-esac
-    *) echo "Usage: dotfiles [add|update|restore|list]" ;;
+    *) echo "Usage: dotfiles [add|update|restore|list|sync]" ;;
 esac
 
