@@ -12,9 +12,10 @@ add_file() {
     # Get absolute path
     local abs_original_path=$(realpath "$original_path")
     
-    # Generate store path (using basename with timestamp for uniqueness)
+    # Generate store path using full path for uniqueness
     local filename=$(basename "$abs_original_path")
-    local store_path="$STORE_DIR/$filename"
+    local path_hash=$(echo "$abs_original_path" | md5sum | cut -d' ' -f1 | cut -c1-8)
+    local store_path="$STORE_DIR/${filename}_${path_hash}"
     
     # Create store directory if needed
     mkdir -p "$STORE_DIR"
@@ -63,12 +64,8 @@ update_files() {
                     
                     if [[ "$current_checksum" != "$checksum" ]]; then
                         echo "File $original_path has changed, updating..."
+                        checksum="$current_checksum"
                         changes_detected=true
-                        
-                        # Move the new version to store (overwriting old one)
-                        # This assumes we want to track the new version
-                        # In practice, you might want to handle this differently
-                        # For now, we'll just update the checksum
                     fi
                 fi
             fi
@@ -106,12 +103,9 @@ restore_files() {
         
         # Check if the file exists in store
         if [[ -f "$store_path" ]]; then
-            # Move file from store back to original location
-            echo "Restoring $original_path from store..."
-            mv "$store_path" "$original_path"
-            
-            # Set proper permissions (optional)
-            chmod --reference="$store_path" "$original_path" 2>/dev/null || true
+            # Create symlink from original location to store
+            echo "Creating symlink at $original_path -> $store_path"
+            ln -sf "$store_path" "$original_path"
         else
             echo "Warning: File not found in store: $store_path"
         fi
